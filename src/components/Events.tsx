@@ -1,17 +1,13 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { EventsProps, FiltersProps } from "../utils/events.types";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import axios from "axios";
 import Loading from "./Loading";
 import Event from "./Event";
-
-
 const Events = () => {
-  const [page, setPage] = useState<number>(1);
+
   const EventsAPI = `https://my-json-server.typicode.com/Code-Pop/Touring-Vue-Router/events`;
   const [loading, setLoading] = useState<boolean>(false);
   const [events, setEvents] = useState<EventsProps[]>([]);
-
   const [filters, setFilters] = useState<FiltersProps>({
     pet: false,
     search: "",
@@ -32,29 +28,6 @@ const Events = () => {
   useEffect(() => {
     getAllEvents();
   }, []);
-
-
-  const handlePage = (index: number) => {
-    setPage(index);
-  };
-  const nextPage = () => {
-    setPage((prevState) => {
-      let nextPage = prevState + 1;
-      if (nextPage > events.length - 1) {
-        nextPage = 0;
-      }
-      return nextPage;
-    });
-  };
-  const prevPage = () => {
-    setPage((prevState) => {
-      let lastPage = prevState - 1;
-      if (lastPage < 0) {
-        lastPage = events.length - 1;
-      }
-      return lastPage;
-    });
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, checked, type } = e.target;
@@ -118,32 +91,6 @@ const Events = () => {
               );
             })}
         </div>
-      </div>
-      <div className="btn-container">
-        <button
-          className="prev-btn"
-          onClick={prevPage}
-        >
-          <FaChevronLeft />
-        </button>
-        {loading &&
-          events.map((_, index) => {
-            return (
-              <button
-                key={index}
-                className={`page-btn ${index === page ? "active-btn" : null}`}
-                onClick={() => handlePage(index)}
-              >
-                {index + 1}
-              </button>
-            );
-          })}
-        <button
-          className="next-btn"
-          onClick={nextPage}
-        >
-          <FaChevronRight />
-        </button>
       </div>
     </section>
   );
