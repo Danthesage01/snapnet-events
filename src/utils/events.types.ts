@@ -22,5 +22,9 @@ export type Events = {
  petsAllowed: true,
  organizer: string
 }[]
+export type FiltersProps = {
+ pet: boolean,
+ search: string,
+}
 
 

@@ -22,7 +22,9 @@ const Event: React.FC<EventsProps> = ({
             <p className="talk-details">{time}</p>
             <p className="talk-details">{date}</p>
           </div>
-          <p className="talk-details">{petsAllowed}</p>
+          <p className="talk-details">
+            {petsAllowed ? "Pet allowed" : "Pet not allowed"}
+          </p>
         </div>
       </div>
 

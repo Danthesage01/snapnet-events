@@ -1,19 +1,21 @@
-import React, { useState, useEffect, SetStateAction } from "react";
-import { EventsProps } from "../utils/events.types";
+import React, { useState, useEffect, Suspense } from "react";
+import { EventsProps, FiltersProps } from "../utils/events.types";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import axios from "axios";
 import Loading from "./Loading";
 import Event from "./Event";
-import { FaToggleOff, FaToggleOn } from "react-icons/fa";
 
 
 const Events = () => {
- // const [page, setPage] = useState<number>(1);
+  const [page, setPage] = useState<number>(1);
+  const EventsAPI = `https://my-json-server.typicode.com/Code-Pop/Touring-Vue-Router/events`;
   const [loading, setLoading] = useState<boolean>(false);
   const [events, setEvents] = useState<EventsProps[]>([]);
-  const [search, setSearch] = useState("");
-  const [pet, setPet] = useState(false);
-  const EventsAPI = `https://my-json-server.typicode.com/Code-Pop/Touring-Vue-Router/events`;
+
+  const [filters, setFilters] = useState<FiltersProps>({
+    pet: false,
+    search: "",
+  });
 
   const getAllEvents = async () => {
     setLoading(true);
@@ -31,38 +33,37 @@ const Events = () => {
     getAllEvents();
   }, []);
 
-  // const handlePage = (index: number) => {
-  //   setPage(index);
-  // };
-  // const nextPage = () => {
-  //   setPage((prevState) => {
-  //     let nextPage = prevState + 1;
-  //     if (nextPage > events.length - 1) {
-  //       nextPage = 0;
-  //     }
-  //     return nextPage;
-  //   });
-  // };
-  // const prevPage = () => {
-  //   setPage((prevState) => {
-  //     let lastPage = prevState - 1;
-  //     if (lastPage < 0) {
-  //       lastPage = events.length - 1;
-  //     }
-  //     return lastPage;
-  //   });
-  // };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.value);
-    setSearch(e.target.value)
+  const handlePage = (index: number) => {
+    setPage(index);
+  };
+  const nextPage = () => {
+    setPage((prevState) => {
+      let nextPage = prevState + 1;
+      if (nextPage > events.length - 1) {
+        nextPage = 0;
+      }
+      return nextPage;
+    });
+  };
+  const prevPage = () => {
+    setPage((prevState) => {
+      let lastPage = prevState - 1;
+      if (lastPage < 0) {
+        lastPage = events.length - 1;
+      }
+      return lastPage;
+    });
   };
 
-  const toggleFilter = () => {
-   setPet(!pet)
-   console.log(pet)
-    // const newEvents = events.filter((event) => event.petsAllowed === true);
-    // return newEvents;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, checked, type } = e.target;
+    setFilters((prev) => {
+      return {
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      };
+    });
   };
 
   if (loading) {
@@ -70,40 +71,55 @@ const Events = () => {
   }
 
   return (
-    <section className="section products">
+    <section>
       <div className="talks-container">
         <h4 className="events-heading">All Events</h4>
-        <div className="filters">
+        <form
+          onSubmit={(e: React.FormEvent<HTMLFormElement>) => e.preventDefault()}
+          className="filters"
+        >
           <input
             type="text"
-            placeholder="search by event"
-            value={search}
+            placeholder="search by event title"
+            name="search"
+            value={filters.search}
             onChange={handleChange}
           />
-
-          <span>
-            Filter By Pet
-            <button
+          <div className="pet-filters">
+            <label htmlFor="pet">Allow Pet?</label>
+            <input
+              type="checkbox"
+              name="pet"
+              id="pet"
+              onChange={handleChange}
+              checked={filters.pet}
               className="toggle-btn"
-              onClick={toggleFilter}
-            >
-              {pet === false ? <FaToggleOn /> : <FaToggleOff />}
-            </button>
-          </span>
-        </div>
+            />
+          </div>
+        </form>
         <div className="talks">
-          {events.map((event) => {
-            const { id } = event;
-            return (
-              <Event
-                key={id}
-                {...event}
-              />
-            );
-          })}
+          {[...events]
+            .filter((event) => {
+              if (filters.pet) {
+                return event.petsAllowed === true;
+              }
+              if (filters.search) {
+                return event.title.toLowerCase().includes(filters.search);
+              }
+              return event;
+            })
+            .map((event) => {
+              const { id } = event;
+              return (
+                <Event
+                  key={id}
+                  {...event}
+                />
+              );
+            })}
         </div>
       </div>
-      {/* <div className="btn-container">
+      <div className="btn-container">
         <button
           className="prev-btn"
           onClick={prevPage}
@@ -128,9 +144,11 @@ const Events = () => {
         >
           <FaChevronRight />
         </button>
-      </div> */}
+      </div>
     </section>
   );
 };
 
 export default Events;
+
+
